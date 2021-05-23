@@ -38,33 +38,28 @@ def zigzag(highs, lows, depth=10, dev_threshold=5):
     data_highs = [x for x in pivots(highs, floor(depth / 2), True) if x[0]]
     data_lows = [x for x in pivots(lows, floor(depth / 2), False) if x[0]]
 
-    result = []
-    prev_data = None
+    raw_pairs = []
 
     for i, (ind, p) in enumerate(data_highs):
-        if i == 0:
-            prev_data = (ind, p)
-            result.append(
-                ((ind, p),
-                 (data_lows[0][0], data_lows[0][1]))
-            )
-            continue
-
-        lows_d = sorted([(ind_l, p_l) for ind_l, p_l in data_lows if ind > ind_l > prev_data[0]], key=lambda x: x[1])
+        lows_d = sorted([(ind_l, p_l) for ind_l, p_l in data_lows if ind > ind_l], key=lambda x: x[0])
         if lows_d:
-            lows = lows_d[0]
+            lows = lows_d[-1]
 
             if abs(_calc_dev(lows[1], p)) >= dev_threshold:
-                result.append(
+                raw_pairs.append(
                     ((ind, p),
                      (lows[0], lows[1]))
                 )
-        else:
-            if p > prev_data[-1]:
-                last_item = result[-1]
-                result = result[:-1]
-                result.append(((ind, p),
-                     last_item[-1]))
-        prev_data = (ind, p)
+
+    result = []
+
+    for (i_h, p_h),(i_l, p_l) in raw_pairs:
+        if not result:
+            result.append(((i_h, p_h),(i_l, p_l)))
+            continue
+
+        if i_l == result[-1][1][0] and p_h > result[-1][0][1]:
+            result = result[:-1]
+        result.append(((i_h, p_h),(i_l, p_l)))
 
     return result

@@ -58,8 +58,12 @@ def zigzag(highs, lows, depth=10, dev_threshold=5):
             result.append(((i_h, p_h),(i_l, p_l)))
             continue
 
-        if i_l == result[-1][1][0] and p_h > result[-1][0][1]:
-            result = result[:-1]
+        if i_l == result[-1][1][0]:
+            if p_h > result[-1][0][1]:
+                result = result[:-1]
+            else:
+                continue
+
         result.append(((i_h, p_h),(i_l, p_l)))
 
     return result
